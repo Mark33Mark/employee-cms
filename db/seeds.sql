@@ -1,8 +1,8 @@
 
--- Borrowed most of the data from mySQL's 
+-- Most of this data is extracted from mySQL's 
 -- employee sample db.
 
-INSERT INTO department ( name )
+INSERT INTO business_unit ( name )
 VALUES
     ( "Customer Service" ),
     ( "Development" ),
@@ -12,9 +12,10 @@ VALUES
     ( "Production" ),
     ( "Quality Management" ),
     ( "Research" ),
+    ( "Sales" ), 
     ( "Corporate Relations" );
 
-INSERT INTO role ( title, salary, department_id )
+INSERT INTO position_titles ( position_title, salary, business_unit_id )
 VALUES
     ("Senior Engineer","58109","2"),
     ("Senior Engineer","99039","6"),
@@ -241,7 +242,7 @@ VALUES
     ("Staff","71406","10"),
     ("Senior Staff","58745","10");
 
-INSERT INTO employee ( first_name, last_name, role_id, manager_id )
+INSERT INTO employee ( first_name, last_name, position_id, manager_id )
 VALUES
     ("Yagil","Savasere","3","211"),
     ("Matk","Streng","3","207"),
@@ -443,27 +444,27 @@ VALUES
     ("Danai","McFarlan","3","211"),
     ("Amstein","Ernst","2","219"),
     ("Sampalli","Tempesti","5","205"),
-    ("Margareta","Markovitch","4","null"),
-    ("Vishwani","Minakawa","4","null"),
-    ("Ebru","Alpin","4","null"),
-    ("Isamu","Legleitner","4","null"),
-    ("Shirish","Ossenbruggen","5","null"),
-    ("Karsten","Sigstam","4","null"),
-    ("Krassimir","Wegerle","6","null"),
-    ("Rosine","Cools","6","null"),
-    ("Shem","Kieras","6","null"),
-    ("Oscar","Ghazalie","3","null"),
-    ("DeForest","Hagimont","6","null"),
-    ("Leon","DasSarma","6","null"),
-    ("Peternela","Onuegbe","6","null"),
-    ("Rutger","Hofmeyr","6","null"),
-    ("Sanjoy","Quadeer","6","null"),
-    ("Dung","Pesch","6","null"),
-    ("Przemyslawa","Kaelbling","5","null"),
-    ("Hauke","Zhang","5","null"),
-    ("Arie","Staelin","5","null"),
-    ("Hilary","Kambil","4","null"),
-    ("Tonny","Butterworth","5","null"),
-    ("Marjo","Giarratana","5","null"),
-    ("Xiaobin","Spinelli","5","null"),
-    ("Yuchang","Weedman","4","null");
+    ("Margareta","Markovitch","4",null),
+    ("Vishwani","Minakawa","4",null),
+    ("Ebru","Alpin","4",null),
+    ("Isamu","Legleitner","4",null),
+    ("Shirish","Ossenbruggen","5",null),
+    ("Karsten","Sigstam","4",null),
+    ("Krassimir","Wegerle","6",null),
+    ("Rosine","Cools","6",null),
+    ("Shem","Kieras","6",null),
+    ("Oscar","Ghazalie","3",null),
+    ("DeForest","Hagimont","6",null),
+    ("Leon","DasSarma","6",null),
+    ("Peternela","Onuegbe","6",null),
+    ("Rutger","Hofmeyr","6",null),
+    ("Sanjoy","Quadeer","6",null),
+    ("Dung","Pesch","6",null),
+    ("Przemyslawa","Kaelbling","5",null),
+    ("Hauke","Zhang","5",null),
+    ("Arie","Staelin","5",null),
+    ("Hilary","Kambil","4",null),
+    ("Tonny","Butterworth","5",null),
+    ("Marjo","Giarratana","5",null),
+    ("Xiaobin","Spinelli","5",null),
+    ("Yuchang","Weedman","4",null);
