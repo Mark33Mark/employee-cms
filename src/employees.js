@@ -42,10 +42,17 @@ addEmployee = async () => {
                 position_title_selected = response.position_title.trim();
                 managerName = response.manager;
             });
+    
+            if (( managerName !== "no manager / contractor" ) && ( managerName !== "---------------" )) {
 
-    // Unsure if there is a better way to do this?
-    getID = await getID( managerName );
-    manager_id_selected = getID[0].id;
+                // Unsure if there is a better way to do this?
+                getID = await getID( managerName );
+                manager_id_selected = getID[0].id;
+                
+                } else {
+                
+                manager_id_selected = null;
+            }
 
     await inquirer
         .prompt([
@@ -81,14 +88,14 @@ addEmployee = async () => {
                 let return_menu = response.return_main_menu; 
                 if( return_menu === "\tYes") { app_navigator(); }
             });
-
 };
 
 //=================================================================================================
 
-let businessUnitSelected, employeePostionTitleSelected, businessUnitID, employeeID;
+let businessUnitSelected, employeePositionTitleSelected, businessUnitID, positionResponse, employeeID, positionID;
+let currentSalary, currentManager, managerSelectedID;
 
-updateEmployee = async () => {
+updateEmployeePositionTitle = async () => {
 
     let confirm_selection;
 
@@ -102,7 +109,7 @@ updateEmployee = async () => {
         await inquirer
         .prompt(questionEmployeePositionTitle)               
         .then(( response ) => {
-            employeePostionTitleSelected = response.select_position_title;  
+            employeePositionTitleSelected = response.select_position_title;  
         });
 
         await inquirer
@@ -113,12 +120,14 @@ updateEmployee = async () => {
                 // console.log(parseInt(employeeID[0]) + "  " + typeof parseInt(employeeID[0]));
         });
 
+        console.clear();
+        console.log( ascii_banners.bannerApp );
+
         await inquirer
         .prompt( [
             {
                 type:       "list",
-                message:    `\t\nProceed with changing employee ID ${employeeID}'s position title?
-The employee is currently allocated to the business unit: ${businessUnitID} as: ${employeePostionTitleSelected}\n`,
+                message:    `\t\nProceed with changing employee ID ${employeeID}'s position title?\n\n`,
                 name:       "confirm_selection",
                 choices:    [ "\tYes","\tNo thanks, take me to the <Main Menu>" ],
             }
@@ -129,13 +138,58 @@ The employee is currently allocated to the business unit: ${businessUnitID} as: 
 
         if( confirm_selection === "\tNo thanks, take me to the <Main Menu>") { return app_navigator();}
 
-        console.log("Business Unit ID: " + businessUnitID[0] + "\nEmployee ID:  " + employeeID + "\nEmployee Position Title: " + employeePostionTitleSelected);
-        
-        console.log("\nSelect the new position title from the following list.");
+        currentSalary = await queries.findEmployeeSalary( employeeID );
+        console.log(currentSalary);
+        let formatCurrentSalary = "$" + currentSalary[0].salary.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        currentManager = await queries.findEmployeeManager(  currentSalary[0].manager_id );
 
 
+        console.log("Business Unit ID: " + businessUnitID[0] + "\nEmployee ID:  " + employeeID +
+                    "\nEmployee Position Title: " + employeePositionTitleSelected +
+                    "\nCurrent Salary: " + formatCurrentSalary +
+                    "\nCurrent Manager: " + currentManager[0].first_name+ " "+currentManager[0].last_name
+                    );
         
-        // await queries.updateEmployee( businessUnitChange, managerChange, employeeID );
+        await inquirer
+        .prompt(questionPositionTitle)
+        .then(( response ) => {
+                positionResponse = response.change_employee_position_title;
+                positionID = response.change_employee_position_title.split(" ");
+                positionID = parseInt(positionID[0]);
+        });
+
+        // needed in case the Position Title is more than one word - e.g Corporate Relations.
+        let extractPositionName = positionResponse.substr(positionResponse.indexOf(" ")).trim();
+
+
+        await inquirer
+        .prompt([
+            {
+                type:       "list",
+                message:    `\t\nSelect salary package for ${ extractPositionName } ?`,
+                name:       "salaryPackage",
+                pageSize:   30,
+                choices:    async () => {
+                                let resultArray = [];
+                                let result = await queries.listSalaryPackages( extractPositionName );
+
+                                for( i = 0; i < result.length; i++ ){
+                                    resultArray[i] = result[i].salary;
+                                    resultArray[i] = "$" + resultArray[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                }
+                                return resultArray;
+                            },
+            }
+        ])
+        .then(( response ) => {
+                salaryPackage = response;
+                salarySelected = salaryPackage.salaryPackage;
+                salarySelected = parseInt(salarySelected.replace("$","").replace(",",""));
+            });
+
+        let employeeNewPositionID = await queries.getNewPositionID( extractPositionName, salarySelected );
+        await queries.updateEmployeePosition( employeeNewPositionID[0].id, employeeID );
 
     await inquirer
     .prompt( questions.return_main_menu )
@@ -143,6 +197,115 @@ The employee is currently allocated to the business unit: ${businessUnitID} as: 
         let return_menu = response.return_main_menu; 
         if( return_menu === "\tYes") { app_navigator(); }
     });
+};
+
+//=================================================================================================
+
+updateEmployeesManager= async () => {
+    let confirm_selection;
+
+    await inquirer
+        .prompt(questions.employeeBusinessUnit)
+        .then(( response ) => {
+            businessUnitSelected = response.business_unit;
+            businessUnitID = businessUnitSelected.split(" ");
+        });
+
+        await inquirer
+        .prompt(questionEmployeePositionTitle)               
+        .then(( response ) => {
+            employeePositionTitleSelected = response.select_position_title;  
+        });
+
+        await inquirer
+        .prompt(questionEmployeeSelection)
+        .then(( response ) => {
+                employeeID = response.delete_employee.split(" ");
+                employeeID = parseInt(employeeID[0]);
+                // console.log(parseInt(employeeID[0]) + "  " + typeof parseInt(employeeID[0]));
+        });
+
+        console.clear();
+        console.log( ascii_banners.bannerApp );
+
+        await inquirer
+        .prompt( [
+            {
+                type:       "list",
+                message:    `\t\nProceed with changing employee ID ${employeeID}'s Manager?\n\n`,
+                name:       "confirm_selection",
+                choices:    [ "\tYes","\tNo thanks, take me to the <Main Menu>" ],
+            }
+        ])
+        .then(( response ) => {
+            confirm_selection = response.confirm_selection; 
+        });
+
+        if( confirm_selection === "\tNo thanks, take me to the <Main Menu>") { return app_navigator();}
+
+        currentSalary = await queries.findEmployeeSalary( employeeID );
+        console.log(currentSalary);
+        let formatCurrentSalary = "$" + currentSalary[0].salary.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        console.clear();
+        console.log( ascii_banners.bannerApp );
+
+        currentManager = await queries.findEmployeeManager(  currentSalary[0].manager_id );
+
+            if ( currentManager.length === 0 ){ 
+                
+                console.log("Business Unit ID: " + businessUnitID[0] + 
+                            "\nEmployee ID:  " + employeeID +
+                            "\nEmployee Position Title: " + employeePositionTitleSelected +
+                            "\nCurrent Salary: " + formatCurrentSalary +
+                            "\nCurrent Manager: This employee is a manager"
+                            );
+            } else {
+                console.log("Business Unit ID: " + businessUnitID[0] + 
+                            "\nEmployee ID:  " + employeeID +
+                            "\nEmployee Position Title: " + employeePositionTitleSelected +
+                            "\nCurrent Salary: " + formatCurrentSalary +
+                            "\nCurrent Manager: " + currentManager[0].first_name+ " "+currentManager[0].last_name
+                            );
+            }
+        
+        await inquirer
+        .prompt(
+            {
+                type:       "list",
+                message:    `\t\nSelect the manager for employee id ${ employeeID } ?`,
+                name:       "managerSelect",
+                pageSize:   30,
+                choices:    async () => {
+                                let resultArray = ["---------------","make a manager","---------------"];
+                                let result = await queries.listManager( employeeID );
+
+                                for( i = 0; i < result.length; i++ ){
+                                    resultArray[i+3] = result[i].id + " "+ result[i].first_name + " " + result[i].last_name;
+                                }
+                                return resultArray;
+                            },
+            })
+        .then(( response ) => {
+
+            if  (( response.managerSelect !== "make a manager" ) && ( response.managerSelect !== "---------------" )) {
+                positionResponse = response.managerSelect;
+                managerSelectedID = positionResponse.split(" ");
+                managerSelectedID = parseInt(managerSelectedID[0]);
+            } else {
+                managerSelectedID = null;
+            }
+        });
+
+        await queries.updateEmployeesManager( managerSelectedID, employeeID);
+
+        await inquirer
+        .prompt( questions.return_main_menu )
+        .then(( response ) => {
+            let return_menu = response.return_main_menu; 
+            if( return_menu === "\tYes") { app_navigator(); }
+        });
+
 };
 
 //=================================================================================================
@@ -159,7 +322,7 @@ deleteEmployee = async () => {
         await inquirer
         .prompt(questionEmployeePositionTitle)               
         .then(( response ) => {
-            employeePostionTitleSelected = response.select_position_title;  
+            employeePositionTitleSelected = response.select_position_title;  
         });
 
         await inquirer
@@ -232,7 +395,7 @@ const questionEmployeePositionTitle = [
 const questionEmployeeSelection = [
     {
         type: "list",
-        message: `\nSelect the employee to update or remove from the database?\n`,
+        message: `\nSelect the employee from the list?\n`,
         name: "delete_employee",
         choices:    async () => {   
                                 let resultArray = [];
@@ -248,10 +411,30 @@ const questionEmployeeSelection = [
 
 //=================================================================================================
 
+const questionPositionTitle = [
+    {
+        type: "list",
+        message: `\nSelect the new Position Title for the employee?\n`,
+        name: "change_employee_position_title",
+        choices:    async () => {   
+                                let resultArray = [];
+                                let result = await queries.listPositionTitles(); 
+
+                                for( i = 0; i < result.length; i++ ){
+                                    resultArray[i] = result[i].id + "  " + result[i].position_title;
+                                }  
+                                return resultArray; 
+                            },
+    },
+];
+
+//=================================================================================================
+
 module.exports = {
     listEmployees,
     addEmployee,
-    updateEmployee,
+    updateEmployeePositionTitle,
+    updateEmployeesManager,
     deleteEmployee,
 };
 

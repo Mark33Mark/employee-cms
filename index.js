@@ -9,6 +9,7 @@ const questions       = require( "./src/inquirer_questions" );
 const employees       = require( "./src/employees" );
 const businessUnits   = require( "./src/businessUnits" );
 const positionTitles  = require( "./src/positionTitles" );
+const reports         = require( "./src/reports" );
 const exit            = require ( "./src/exit" );
 
 const ascii_banners   = require( "./helpers/ascii-titles" );
@@ -19,13 +20,8 @@ app_navigator = async () => {
 
     console.clear();
     console.log( ascii_banners.bannerApp );
-    console.log('Terminal size: ' + process.stdout.columns + 'x' + process.stdout.rows);
+    // console.log('Your terminal size: ' + process.stdout.columns + 'x' + process.stdout.rows);
     
-    process.stdout.columns = 150;
-    process.stdout.rows = 65;
-
-    process.stdout.on('resize', () => {console.log(process.stdout.columns, process.stdout.rows);});
-
     await inquirer
         .prompt( questions.main_menu )
         .then(( response ) => {
@@ -46,31 +42,31 @@ app_navigator = async () => {
                     employees.listEmployees();
                     break;
                 case "\tUpdate employee's position title?":
-                    employees.updateEmployee();
+                    employees.updateEmployeePositionTitle();
                     break;
                 case "\tUpdate employee's manager?":
-                    employees.changeEmployeesManager();
+                    employees.updateEmployeesManager();
                     break;
-                case "\tDelete employee fom database?":
+                case "\tDelete employee from database?":
                     employees.deleteEmployee();
                     break;
                 case "\tCreate a position title?":
-                    positionTitles.addPostionTitle();
+                    positionTitles.addPositionTitle();
                     break;
                 case "\tList all position titles?":
                     positionTitles.listPositionTitles();
                     break;
                 case "\tDelete a position title?":
-                    positionTitles.deletePostionTitle();
+                    positionTitles.deletePositionTitle();
                     break;
-                case "\tManager's report line.":
-                    reports.addPostionTitle();
+                case "\tManager's report lines":
+                    reports.managersReport();
                     break;
-                case "\tEmployees organised by business unit.":
-                    reports.addPostionTitle();
+                case "\tManager's salaries budget":
+                    reports.salariesReportByManager();
                     break;
-                case "\tBusiness unit salaries overhead.":
-                    reports.addPostionTitle();
+                case "\tBusiness unit salaries budget":
+                    reports.businessUnitSalaries();
                     break;
                 case "\t< Exit Employee CMS >\n":
                     exit.exitApp();

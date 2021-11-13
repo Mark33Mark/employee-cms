@@ -18,7 +18,7 @@ const queries   = {
     },
 
     businessUnit_find_id: async ( businessUnit ) => {
-        console.log(businessUnit);
+
         const connection = await mysql;
         const  [ rows, fields ] = await connection.execute( "SELECT id FROM business_unit WHERE name = (?);" [ businessUnit ]);
         return rows;
@@ -48,15 +48,27 @@ const queries   = {
         return rows;
     },
 
-    listManager: async () => {
+    listManager: async ( id ) => {
         const connection = await mysql;
-        const [ rows, fields ]  = await connection.execute( "SELECT manager_id, first_name, last_name FROM employee WHERE manager_id IS NULL ORDER BY last_name ASC" );
+        const sql = "SELECT id, first_name, last_name FROM employee WHERE manager_id IS NULL AND id <> (?) ORDER BY last_name ASC;"
+        const [ rows, fields ]  = await connection.execute( sql, [id]  );
         return rows;
+    },
+
+    updateEmployeesManager: async ( manager_id, employee_id ) => {
+        const connection = await mysql;
+        const sql = "UPDATE employee SET manager_id = (?) WHERE employee.id = (?);";
+        await connection.execute(sql, [ manager_id, employee_id ]);
+        if ( manager_id === null) {
+            console.log(`\nEmployee with id ${employee_id} is now a manager.\n`); 
+        } else {
+            console.log(`\nEmployee with id ${employee_id} has had their report line (manager) updated in the database.\n`); 
+        }
     },
 
     listSalaryPackages: async ( position ) => {
         const connection = await mysql;
-        const sql = "SELECT salary FROM position_titles WHERE position_title = (?) ORDER BY salary ASC";
+        const sql = "SELECT id, salary FROM position_titles WHERE position_title = (?) ORDER BY salary ASC";
         const [ rows, fields ]  = await connection.execute( sql, [ position ] );
         return rows;
     },
@@ -80,14 +92,43 @@ const queries   = {
         const connection = await mysql;
         const sql = "INSERT INTO employee (first_name, last_name, position_id, manager_id) VALUES (?, ?, ?, ?)";
         await connection.execute( sql, [ first_name, last_name, position_id, manager_id ] );
-        console.log( `${first_name} ${last_name} has been added to the database.` );   
+        if ( manager_id === null ) {
+            console.log( `\n${first_name} ${last_name} has been added to the database \nas Manager (no assigned manager).` );
+            } else {
+            console.log( `\n${first_name} ${last_name} has been added to the database.` );
+            }
     },
 
-    updateEmployee: async ( position_id, manager_id, id ) =>{
+    updateEmployeePosition: async ( position_id, id ) =>{
         const connection = await mysql;
-        const sql = "UPDATE employee SET position_id=?, manager_id=? WHERE id = ?;";
-        await connection.execute(sql, [ position_id, manager_id, id ]);
-        console.log(`Employee id ${id} has been updated in the database.`);
+        const sql = "UPDATE employee SET position_id = (?) WHERE employee.id = (?);";
+        await connection.execute(sql, [ position_id, id ]);
+        console.log(`\nEmployee with id ${id} position title has been updated in the database.\n`);
+    },
+    
+    findEmployeeSalary:  async ( id ) =>{
+        const connection = await mysql;
+        const sql = `SELECT salary, manager_id
+                    FROM employee
+                    INNER JOIN position_titles
+                    ON employee.position_id = position_titles.id
+                    WHERE employee.id=(?);`;
+        const [rows, fields] = await connection.execute(sql, [ id ] );
+        return rows;
+    },
+
+    getNewPositionID:   async ( position_title, salary ) =>{
+        const connection = await mysql;
+        const sql = `SELECT id FROM position_titles WHERE position_title = (?) AND salary = (?);`;
+        const [rows, fields] = await connection.execute(sql, [ position_title, salary ] );
+        return rows;
+    },
+
+    findEmployeeManager:  async ( id ) =>{
+        const connection = await mysql;
+        const sql = `SELECT first_name, last_name FROM employee WHERE employee.id = (?);`;
+        const [rows, fields] = await connection.execute(sql, [ id ] );
+        return rows;
     },
 
     listEmployeeForDeletion:  async ( id ) =>{
@@ -107,7 +148,7 @@ const queries   = {
         const connection = await mysql;
         const sql = "DELETE FROM employee WHERE id = (?) LIMIT 1";
         await connection.execute(sql, [ id ] );
-        console.log(`Employee id ${id} has been deleted from the database.`);
+        console.log(`\nEmployee id ${id} has been deleted from the database.\n`);
     },
 
     listPositionTitles: async () => {
@@ -119,19 +160,112 @@ const queries   = {
     addPositionTitle: async ( title, salary, business_unit_id ) =>  {
         
         const connection = await mysql;
-        const sql = `INSERT INTO position_titles (position_title, salary, business_unit_id) VALUES (?, ?, ?)`;
+        const sql = `INSERT INTO position_titles (position_title, salary, business_unit_id) VALUES (?, ?, ?);`;
         
         await connection.execute( sql, [ title, salary, business_unit_id ] );
-        console.log( `The position: "${title}" has been added to the database` );  
+        console.log( `\nThe position: "${title}" has been added to the database\n` );  
+    },
+
+    positionTitlesListConstruct: async () => {
+        const connection = await mysql;
+        const sql = `SELECT position_titles.id, position_title, salary, business_unit.name 
+                    FROM position_titles
+                    INNER JOIN business_unit
+                    ON position_titles.business_unit_id = business_unit.id
+                    GROUP BY position_title
+                    ORDER BY position_title ASC;`;
+        const [rows, fields] = await connection.execute( sql );
+        return rows;
+    },
+
+    businessListConstruct: async ( position_title ) => {
+        const connection = await mysql;
+        const sql = `SELECT position_titles.id, position_title, salary, business_unit.name 
+                    FROM position_titles
+                    INNER JOIN business_unit
+                    ON position_titles.business_unit_id = business_unit.id
+                    WHERE position_title = (?)
+                    GROUP BY business_unit.name
+                    ORDER BY position_title ASC;`;
+        const [rows, fields] = await connection.execute( sql, [ position_title ] );
+        return rows;
+    },
+
+    salariesListConstruct: async ( position_title, name ) => {
+        const connection = await mysql;
+        const sql = `SELECT position_titles.id, position_title, salary, business_unit.name 
+                    FROM position_titles
+                    INNER JOIN business_unit
+                    ON position_titles.business_unit_id = business_unit.id
+                    WHERE position_title = (?) AND name = (?)
+                    GROUP BY business_unit.name
+                    ORDER BY position_title ASC;`;
+        const [rows, fields] = await connection.execute( sql, [ position_title, name ] );
+        return rows;
+    },
+
+    returnIDConstruct: async ( position_title, salary, name ) => {
+        const connection = await mysql;
+        const sql = `SELECT position_titles.id
+                    FROM position_titles
+                    INNER JOIN business_unit
+                    ON position_titles.business_unit_id = business_unit.id
+                    WHERE position_title = (?) AND salary = (?) AND name = (?)
+                    GROUP BY business_unit.name
+                    ORDER BY position_title ASC;`;
+        const [rows, fields] = await connection.execute( sql, [ position_title, salary, name ] );
+        return rows;
     },
 
     deletePositionTitle: async ( id ) =>  {
         
         const connection = await mysql;
-        const sql = `DELETE FROM position_titles WHERE id = (?) LIMIT 1`;
-        
+        const sql = `DELETE FROM position_titles WHERE id = (?) LIMIT 1`;       
         await connection.execute( sql, [ id ] );
-        console.log( `The position: "${title}" has been added to the database` );  
+        console.log( `The position id: "${id}" has been deleted from the database` );  
+    },
+
+    managersEmployeeReports: async ( ) => {
+        const connection = await mysql;
+        const sql = `SELECT ifnull(manager_id, "Manager") as manager_id, first_name, last_name, salary
+                        FROM business_unit, position_titles, employee
+                        WHERE business_unit.id = position_titles.business_unit_id
+                            AND position_titles.id = employee.position_id
+                        ORDER BY manager_id ASC;`;
+        const [rows, fields] = await connection.execute( sql );
+        return rows;
+    },
+
+    managersReportSalaries: async ( ) => {
+        const connection = await mysql;
+        const sql = `SELECT manager_id, first_name, last_name, sum(salary)
+                        FROM business_unit, position_titles, employee
+                        WHERE business_unit.id = position_titles.business_unit_id
+                            AND position_titles.id = employee.position_id
+                        GROUP BY manager_id
+                        ORDER BY last_name ASC`;
+        const [rows, fields] = await connection.execute( sql );
+        return rows;
+    },
+    salariesByBusinessUnit: async ( ) => {
+        const connection = await mysql;
+        const sql = `SELECT name, sum(salary)
+                        FROM business_unit, position_titles, employee
+                        WHERE business_unit.id = position_titles.business_unit_id
+                            AND position_titles.id = employee.position_id
+                        GROUP BY name
+                        ORDER BY name ASC;`;
+        const [rows, fields] = await connection.execute( sql );
+        return rows;
+    },
+    tallyOfBusinessOverheads: async ( ) => {
+        const connection = await mysql;
+        const sql = `SELECT count(employee.id), sum(salary)
+                    FROM business_unit, position_titles, employee
+                    WHERE business_unit.id = position_titles.business_unit_id
+                        AND position_titles.id = employee.position_id;`;
+        const [rows, fields] = await connection.execute( sql );
+        return rows;
     },
 };
 
