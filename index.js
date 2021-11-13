@@ -19,40 +19,49 @@ app_navigator = async () => {
 
     console.clear();
     console.log( ascii_banners.bannerApp );
+    console.log('Terminal size: ' + process.stdout.columns + 'x' + process.stdout.rows);
+    
+    process.stdout.columns = 150;
+    process.stdout.rows = 65;
+
+    process.stdout.on('resize', () => {console.log(process.stdout.columns, process.stdout.rows);});
 
     await inquirer
         .prompt( questions.main_menu )
         .then(( response ) => {
             switch ( response.main_menu ) {
+                case "\tCreate a business unit?":
+                    businessUnits.addBusinessUnit();
+                    break;
                 case "\tList all business units?":
                     businessUnits.listBusinessUnits();
-                    break;
-                case "\tAdd a business unit?":
-                    businessUnits.addBusinessUnit();
                     break;
                 case "\tDelete a business unit?":
                     businessUnits.deleteBusinessUnit();
                     break;
-                case "\tView all employees?":
-                    employees.listEmployees();
-                    break;
-                case "\tAdd an employee?":
+                case "\tCreate employee in database?":
                     employees.addEmployee();
                     break;
-                case "\tDelete an employee?":
-                    employees.deleteEmployee();
+                case "\tList all employees?":
+                    employees.listEmployees();
                     break;
                 case "\tUpdate employee's position title?":
                     employees.updateEmployee();
                     break;
-                case "\tChange employee's manager?":
+                case "\tUpdate employee's manager?":
                     employees.changeEmployeesManager();
                     break;
-                case "\tView all position titles?":
+                case "\tDelete employee fom database?":
+                    employees.deleteEmployee();
+                    break;
+                case "\tCreate a position title?":
+                    positionTitles.addPostionTitle();
+                    break;
+                case "\tList all position titles?":
                     positionTitles.listPositionTitles();
                     break;
-                case "\tAdd a position title?":
-                    positionTitles.addPostionTitle();
+                case "\tDelete a position title?":
+                    positionTitles.deletePostionTitle();
                     break;
                 case "\tManager's report line.":
                     reports.addPostionTitle();

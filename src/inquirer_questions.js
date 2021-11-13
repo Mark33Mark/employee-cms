@@ -1,7 +1,6 @@
 
-const inquirer      = require( "inquirer" );
-const queries       = require( "../helpers/sql_queries" );
-
+const inquirer          = require( "inquirer" );
+const queries           = require( "../helpers/sql_queries" );
 
 // === Main, Exit and Return to Main Menu =========================================================
 
@@ -9,21 +8,22 @@ const main_menu = {
     type:       "list",
     message:    "< Main Menu >",
     name:       "main_menu",
-    pageSize:   30,
+    pageSize:   35,
     choices: [
         new inquirer.Separator("\n\x1b[47m\x1b[30m = Business Units =================  \x1b[0m\n"),
+        "\tCreate a business unit?", 
         "\tList all business units?", 
-        "\tAdd a business unit?", 
         "\tDelete a business unit?", 
         new inquirer.Separator("\n\x1b[47m\x1b[30m = Employees =======================  \x1b[0m\n"),
-        "\tView all employees?",
-        "\tAdd an employee?",
-        "\tDelete an employee?", 
+        "\tCreate employee in database?",
+        "\tList all employees?",
         "\tUpdate employee's position title?",
-        "\tChange employee's manager?",
+        "\tUpdate employee's manager?",
+        "\tDelete employee fom database?", 
         new inquirer.Separator("\n\x1b[47m\x1b[30m = Position Titles =================  \x1b[0m\n"),
-        "\tView all position titles?", 
-        "\tAdd a position title?", 
+        "\tCreate a position title?", 
+        "\tList all position titles?", 
+        "\tDelete a position title?", 
         new inquirer.Separator("\n\x1b[47m\x1b[30m = Reports =========================  \x1b[0m\n"),
         "\tManager's report line.", 
         "\tEmployees organised by business unit.",
@@ -92,24 +92,47 @@ const employeeQuestions = [
         name:       "position_title",
         pageSize:   20,
         choices:    async () => {
-                                    let result = await queries.listPositionTitles();
-                                    return result;
-                                }
+                                    let resultArray = [];
+                                    let result = await queries.listPositionTitles();                                
+                                        for( i = 0; i < result.length; i++ ){
+                                            resultArray[i] = result[i].position_title;
+                                        }
+                                    return resultArray;
+                                },
     },
     {
         type:     "list",
         message:  "\t\nEmployee's manager?\n",
         name:     "manager",
-        pageSize:   20,
+        pageSize:   30,
         choices:  async () => { 
+                                let resultArray = ["---------------","no manager / contractor","---------------"];
                                 let result = await queries.listManager(); 
-                                return result; 
+                                    
+                                for( i = 0; i < result.length; i++ ){
+                                    resultArray[i+3] = result[i].first_name+" "+result[i].last_name;
+                                }                   
+                                return resultArray; 
                             },
-    }
+    },
 ];
 
+const employeeBusinessUnit = [
+    {
+        type: "list",
+        message: "\t\nWhich business unit is the employee from?",
+        name: "business_unit",
+        choices:    async () => { 
+                                let resultArray=[];
+                                let result = await queries.businessUnits_id(); 
 
-
+                                for( i = 0; i < result.length; i++ ){
+                                    resultArray[i] = result[i].id+" "+result[i].name;
+                                }                   
+                                return resultArray; 
+                            },
+    },
+];
 
 // === Position Titles ===================================================================================
 
@@ -124,6 +147,8 @@ module.exports = {
     delete_businessUnit,
     listBusinessUnit_sortOrder,
     employeeQuestions,
+    employeeBusinessUnit,
+
 };
 
 /*===================================================================================================
