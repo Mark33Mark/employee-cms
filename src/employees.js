@@ -144,7 +144,6 @@ updateEmployeePositionTitle = async () => {
 
         currentManager = await queries.findEmployeeManager(  currentSalary[0].manager_id );
 
-
         console.log("Business Unit ID: " + businessUnitID[0] + "\nEmployee ID:  " + employeeID +
                     "\nEmployee Position Title: " + employeePositionTitleSelected +
                     "\nCurrent Salary: " + formatCurrentSalary +
