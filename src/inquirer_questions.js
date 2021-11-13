@@ -19,15 +19,15 @@ const main_menu = {
         "\tList all employees?",
         "\tUpdate employee's position title?",
         "\tUpdate employee's manager?",
-        "\tDelete employee fom database?", 
+        "\tDelete employee from database?", 
         new inquirer.Separator("\n\x1b[47m\x1b[30m = Position Titles =================  \x1b[0m\n"),
         "\tCreate a position title?", 
         "\tList all position titles?", 
         "\tDelete a position title?", 
         new inquirer.Separator("\n\x1b[47m\x1b[30m = Reports =========================  \x1b[0m\n"),
-        "\tManager's report line.", 
-        "\tEmployees organised by business unit.",
-        "\tBusiness unit salaries overhead.",
+        "\tManager's report lines", 
+        "\tManager's salaries budget",
+        "\tBusiness unit salaries budget",
         new inquirer.Separator("\n\x1b[43m\x1b[30m = Exit ============================  \x1b[0m\n"),
         "\t< Exit Employee CMS >\n"
     ],
@@ -67,11 +67,11 @@ const delete_businessUnit = {
 
 const listBusinessUnit_sortOrder = {
     type:       "list",
-    message:    "\tChange the column sort or return to <Main Menu>?\n",
+    message:    "\t\n",
     name:       "listBusinessUnit_sortOrder",
     choices:    [ 
-                "\tChange sort column to Business Unit / ID?", 
-                "\tReturn to <Main Menu> ?", 
+                "\t>> Change sort column to Business Unit / ID?", 
+                "\t>> Return to <Main Menu> ?", 
             ],
 };
 

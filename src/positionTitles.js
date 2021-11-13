@@ -6,41 +6,63 @@ const ascii_banners = require( "../helpers/ascii-titles" );
 
 //== C-reate ===============================================================================================
 
-addPositionTitle = async () => {
-    const roleQs = [
-        {
-            type: `input`,
-            message: `What would you like to call the new role?`,
-            name: `roleTitle`,
-        },
-        {
-            type: `input`,
-            message: `Please enter the salary of this role (without commas or dollar signs).`,
-            name: `roleSalary`,
-        },
-        {
-            type: `list`,
-            message: `Please select the associated department for this role.`,
-            name: `deptName`,
-            choices: namesDept,
-        }];
+let businessID;
 
-    let title;
-    let salary;
-    let department_id;
+addPositionTitle = async () => {
+    const addPositionQuestions = [
+        {
+            message: "\t\nName of the new Position Title?",
+            name: "positionTitle",
+        },
+        {
+            message: "\t\nSalary package for the new position?  \t\n(no commas or currency symbols)\n",
+            name: "positionSalary",
+            validate: inputSalary => {
+                            currencyFormat = /^[0-9]+$/.test( inputSalary );
+                            if ( currencyFormat ) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+        },
+        {
+            type: "list",
+            message: "\t\nSelect the Business Unit\n",
+            name: "businessUnitName",
+            page: 25,
+            choices: async () => {
+                                    let resultArray = [];
+                                    let result = await queries.businessUnits_alpha();                                
+                                    
+                                    for( i = 0; i < result.length; i++ ){
+                                    resultArray[i] = result[i].id + " "+ result[i].name;
+                                    }
+                                    return resultArray;
+                                },
+        },
+        ];
+
+        await inquirer
+            .prompt(addPositionQuestions)
+            .then(( response ) => {
+                
+                title    = response.positionTitle;
+                salary   = response.positionSalary;
+                business = response.businessUnitName.trim();
+                });
+            
+
+                businessID = business.split(" ");
+
+    await queries.addPositionTitle(title, salary, businessID[0]);
 
     await inquirer
-        .prompt(roleQs)
-        .then((response) => {
-            title = response.roleTitle;
-            salary = response.roleSalary;
-            for (let i = 0; i < listDept.length; i++) {
-                if (response.deptName === listDept[i].name) {
-                    department_id = listDept[i].id;
-                }
-            }
-        });
-    await queries.addRole(title, salary, department_id);
+    .prompt( questions.return_main_menu )
+    .then(( response ) => {
+        let return_menu = response.return_main_menu; 
+        if( return_menu === "\tYes") { app_navigator(); }
+    });
 };
 
 
@@ -60,7 +82,6 @@ listPositionTitles = async () => {
                 let return_menu = response.return_main_menu; 
                 if( return_menu === "\tYes") { app_navigator(); }
             });
-    ;
 };
 
 //== U-pdate ===============================================================================================
@@ -70,40 +91,90 @@ listPositionTitles = async () => {
 //== D-elete ===============================================================================================
 
 deletePositionTitle = async () => {
-    const roleQs = [
-        {
-            type: `input`,
-            message: `What would you like to call the new role?`,
-            name: `roleTitle`,
-        },
-        {
-            type: `input`,
-            message: `Please enter the salary of this role (without commas or dollar signs).`,
-            name: `roleSalary`,
-        },
-        {
-            type: `list`,
-            message: `Please select the associated department for this role.`,
-            name: `deptName`,
-            choices: namesDept,
-        }];
-
-    let title;
-    let salary;
-    let department_id;
+    const deletePositionQuestions = [
+            {
+                type: "list",
+                message: "Choose the Position Title to delete.",
+                name: "positionTitles",
+                choices: async () => {
+                                        let resultArray = [];
+                                        let result = await queries.positionTitlesListConstruct();                                
+                                        
+                                        for( i = 0; i < result.length; i++ ){
+                                        resultArray[i] =result[i].position_title;
+                                        }
+                                        return resultArray;
+                },
+            },
+        ];
 
     await inquirer
-        .prompt(roleQs)
+        .prompt(deletePositionQuestions)
         .then((response) => {
-            title = response.roleTitle;
-            salary = response.roleSalary;
-            for (let i = 0; i < listDept.length; i++) {
-                if (response.deptName === listDept[i].name) {
-                    department_id = listDept[i].id;
-                }
-            }
+            position_title = response.positionTitles;
         });
-    await queries.addRole(title, salary, department_id);
+
+        console.log(position_title);
+
+    const deleteBusinessQuestions = [
+        {
+            type: "list",
+            message: `Select the business unit for the Position Title: ${ position_title} to be deleted.`,
+            name: "businessUnitName",
+            choices: async () => {
+                                    let resultArray = [];
+                                    let result = await queries.businessListConstruct( position_title );                                
+                                    
+                                    for( i = 0; i < result.length; i++ ){
+                                    resultArray[i] =result[i].name;
+                                    }
+                                    return resultArray;
+            },
+        },
+    ];
+
+    await inquirer
+        .prompt(deleteBusinessQuestions)
+        .then((response) => {
+
+            business = response.businessUnitName;
+        });
+
+    const deleteSalaryQuestions = [
+        {
+            type: "list",
+            message: `Select the salary package for the Position Title: ${ position_title } from ${ business } to be deleted.`,
+            name: "salaryPackage",
+            choices: async () => {
+                                    let resultArray = [];
+                                    let result = await queries.salariesListConstruct( position_title, business );                                
+                                    
+                                    for( i = 0; i < result.length; i++ ){
+                                    resultArray[i] =result[i].salary;
+                                    }
+                                    return resultArray;
+            },
+        },
+    ];
+    
+    await inquirer
+        .prompt(deleteSalaryQuestions)
+        .then((response) => {
+
+            salary = response.salaryPackage;
+        });
+    
+    let positionTitleID = await queries.returnIDConstruct( position_title, salary, business );
+
+    console.log( position_title, business, salary );
+    await queries.deletePositionTitle( positionTitleID[0].id );
+    
+    await inquirer
+    .prompt( questions.return_main_menu )
+    .then(( response ) => {
+        let return_menu = response.return_main_menu; 
+        if( return_menu === "\tYes") { app_navigator(); }
+    });
 };
 
 //=================================================================================================
@@ -111,6 +182,7 @@ deletePositionTitle = async () => {
 module.exports = {
     listPositionTitles,
     addPositionTitle,
+    deletePositionTitle,
 };
 
 /*===================================================================================================

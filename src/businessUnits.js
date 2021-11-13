@@ -17,8 +17,8 @@ listBusinessUnits = async () => {
         .prompt( questions.listBusinessUnit_sortOrder )
         .then(( response ) => {
             let return_menu = response.listBusinessUnit_sortOrder;
-            if( return_menu === "\tChange sort column to Business Unit / ID?"){ listBusinessUnits_id(); }    
-            if( return_menu === "\tReturn to <Main Menu> ?") { app_navigator(); }
+            if( return_menu === "\t>> Change sort column to Business Unit / ID?"){ listBusinessUnits_id(); }    
+            if( return_menu === "\t>> Return to <Main Menu> ?") { app_navigator(); }
         });
 };
 
@@ -36,8 +36,8 @@ listBusinessUnits_id = async () => {
         .prompt( questions.listBusinessUnit_sortOrder )
         .then(( response ) => {
             let return_menu = response.listBusinessUnit_sortOrder;
-            if( return_menu === "\tChange sort column to Business Unit / ID?"){ listBusinessUnits(); }    
-            if( return_menu === "\tReturn to <Main Menu> ?") { app_navigator(); }
+            if( return_menu === "\t>> Change sort column to Business Unit / ID?"){ listBusinessUnits(); }    
+            if( return_menu === "\t>> Return to <Main Menu> ?") { app_navigator(); }
         });
 
 };
