@@ -1,4 +1,4 @@
-![Mark Watson](./public/assets/img/notes_banner.jpg)
+![Mark Watson](./img/banner_README.jpg)
 # USYD-FSF Week12 Project
 ## SQL: Employee Tracker
 

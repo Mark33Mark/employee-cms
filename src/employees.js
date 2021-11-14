@@ -13,15 +13,70 @@ listEmployees = async () => {
     console.log( ascii_banners.bannerApp );
     
     const result = await queries.listEmployees();
-    console.table( "\nYour Employees\n", result );
+    console.table( "\nYour Employees (sorted by Last Name)\n", result );
     
     await inquirer
-            .prompt( questions.return_main_menu )
+            .prompt( questions.employee_menu_options )
             .then(( response ) => {
-                let return_menu = response.return_main_menu; 
-                if( return_menu === "\tYes") { app_navigator(); }
+                let  menu = response.employee_menu_options; 
+                    if( menu === "\tLast Name (default)") { listEmployeeSort(1); }
+                    if( menu === "\tEmployee ID") { listEmployeeSort(2); }
+                    if( menu === "\tPosition Title") { listEmployeeSort(3); }
+                    if( menu === "\tBusiness Unit") { listEmployeeSort(4); }
+                    if( menu === "\tSalary") { listEmployeeSort(5); }
+                    if( menu === "\tReturn to <Main Menu>\n") { app_navigator(); }
             });
 };
+
+//=================================================================================================
+
+listEmployeeSort  = async ( sortSelected ) => {
+    
+    let result;
+
+    console.clear();
+    console.log( ascii_banners.bannerApp );
+
+    switch ( sortSelected ) {
+        case 1:
+            result = await queries.listEmployees();
+            console.table( "\nYour Employees (sorted by Last Name)\n", result ); 
+            break;
+        case 2:
+            result = await queries.listEmployees_id();
+            console.table( "\nYour Employees (soreted by Employee's ID)\n", result ); 
+            break;
+        case 3:
+            result = await queries.listEmployees_position();
+            console.table( "\nYour Employees (soreted by Position Title)\n", result ); 
+            break;
+        case 4:
+            result = await queries.listEmployees_business();
+            console.table( "\nYour Employees (soreted by Business Unit)\n", result ); 
+            break;
+        case 5:
+            result = await queries.listEmployees_salary();
+            console.table( "\nYour Employees (soreted by Salary)\n", result ); 
+            break;
+        default:
+            console.log("You've not selected one of the options, please try again.");
+            app_navigator();
+            break;
+    }
+
+    await inquirer
+    .prompt( questions.employee_menu_options )
+    .then(( response ) => {
+        let  menu = response.employee_menu_options; 
+            if( menu === "\tLast Name (default)") { sortSelected(1); }
+            if( menu === "\tEmployee ID") { listEmployeeSort(2); }
+            if( menu === "\tPosition Title") { listEmployeeSort(3); }
+            if( menu === "\tBusiness Unit") { listEmployeeSort(4); }
+            if( menu === "\tSalary") { listEmployeeSort(5); }
+            if( menu === "\tReturn to <Main Menu>\n") { app_navigator(); }
+    });
+};
+
 
 //=================================================================================================
 
@@ -139,16 +194,27 @@ updateEmployeePositionTitle = async () => {
         if( confirm_selection === "\tNo thanks, take me to the <Main Menu>") { return app_navigator();}
 
         currentSalary = await queries.findEmployeeSalary( employeeID );
-        console.log(currentSalary);
+
         let formatCurrentSalary = "$" + currentSalary[0].salary.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
         currentManager = await queries.findEmployeeManager(  currentSalary[0].manager_id );
 
-        console.log("Business Unit ID: " + businessUnitID[0] + "\nEmployee ID:  " + employeeID +
-                    "\nEmployee Position Title: " + employeePositionTitleSelected +
-                    "\nCurrent Salary: " + formatCurrentSalary +
-                    "\nCurrent Manager: " + currentManager[0].first_name+ " "+currentManager[0].last_name
-                    );
+            if ( currentManager.length === 0 ){ 
+                
+                console.log("Business Unit ID: " + businessUnitID[0] + 
+                            "\nEmployee ID:  " + employeeID +
+                            "\nEmployee Position Title: " + employeePositionTitleSelected +
+                            "\nCurrent Salary: " + formatCurrentSalary +
+                            "\nCurrent Manager: This employee is a manager"
+                            );
+            } else {
+                console.log("Business Unit ID: " + businessUnitID[0] + 
+                            "\nEmployee ID:  " + employeeID +
+                            "\nEmployee Position Title: " + employeePositionTitleSelected +
+                            "\nCurrent Salary: " + formatCurrentSalary +
+                            "\nCurrent Manager: " + currentManager[0].first_name+ " "+currentManager[0].last_name
+                            );
+            }
         
         await inquirer
         .prompt(questionPositionTitle)
@@ -431,6 +497,7 @@ const questionPositionTitle = [
 
 module.exports = {
     listEmployees,
+    listEmployeeSort,
     addEmployee,
     updateEmployeePositionTitle,
     updateEmployeesManager,

@@ -107,7 +107,7 @@ const employeeQuestions = [
         pageSize:   30,
         choices:  async () => { 
                                 let resultArray = ["---------------","no manager / contractor","---------------"];
-                                let result = await queries.listManager(); 
+                                let result = await queries.listManager_employee(); 
                                     
                                 for( i = 0; i < result.length; i++ ){
                                     resultArray[i+3] = result[i].first_name+" "+result[i].last_name;
@@ -116,6 +116,23 @@ const employeeQuestions = [
                             },
     },
 ];
+
+const employee_menu_options = {
+    type:       "list",
+    message:    "\t\n\nSelect a display option ?\n",
+    name:       "employee_menu_options",
+    page:       25,
+    choices:    [ 
+                    new inquirer.Separator("\n\x1b[47m\x1b[30m = Table Sort Options ======  \x1b[0m\n"),          
+                    "\tLast Name (default)",
+                    "\tEmployee ID",
+                    "\tPosition Title",
+                    "\tBusiness Unit",
+                    "\tSalary",
+
+                    new inquirer.Separator("\n\x1b[43m\x1b[30m = Exit =====================  \x1b[0m\n"),          
+                    "\tReturn to <Main Menu>\n" ],
+};
 
 const employeeBusinessUnit = [
     {
@@ -147,6 +164,7 @@ module.exports = {
     delete_businessUnit,
     listBusinessUnit_sortOrder,
     employeeQuestions,
+    employee_menu_options,
     employeeBusinessUnit,
 
 };

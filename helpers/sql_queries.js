@@ -44,7 +44,58 @@ const queries   = {
 
     listEmployees: async () => {
         const connection = await mysql;
-        const [ rows, fields ]  = await connection.execute( "SELECT * FROM employee" );
+        const [ rows, fields ]  = await connection.execute( `SELECT employee.id, first_name, last_name, position_title, name, salary
+                                                            FROM business_unit, position_titles, employee
+                                                            WHERE business_unit.id = position_titles.business_unit_id
+                                                            AND position_titles.id = employee.position_id
+                                                            ORDER BY last_name ASC;` );
+        return rows;
+    },
+
+    listEmployees_id: async () => {
+        const connection = await mysql;
+        const [ rows, fields ]  = await connection.execute( `SELECT employee.id, first_name, last_name, position_title, name, salary
+                                                            FROM business_unit, position_titles, employee
+                                                            WHERE business_unit.id = position_titles.business_unit_id
+                                                            AND position_titles.id = employee.position_id
+                                                            ORDER BY employee.id ASC;` );
+        return rows;
+    },
+
+    listEmployees_position: async () => {
+        const connection = await mysql;
+        const [ rows, fields ]  = await connection.execute( `SELECT employee.id, first_name, last_name, position_title, name, salary
+                                                            FROM business_unit, position_titles, employee
+                                                            WHERE business_unit.id = position_titles.business_unit_id
+                                                            AND position_titles.id = employee.position_id
+                                                            ORDER BY position_title ASC;` );
+        return rows;
+    },
+
+    listEmployees_business: async () => {
+        const connection = await mysql;
+        const [ rows, fields ]  = await connection.execute( `SELECT employee.id, first_name, last_name, position_title, name, salary
+                                                            FROM business_unit, position_titles, employee
+                                                            WHERE business_unit.id = position_titles.business_unit_id
+                                                            AND position_titles.id = employee.position_id
+                                                            ORDER BY name ASC;` );
+        return rows;
+    },
+
+    listEmployees_salary: async () => {
+        const connection = await mysql;
+        const [ rows, fields ]  = await connection.execute( `SELECT employee.id, first_name, last_name, position_title, name, salary
+                                                            FROM business_unit, position_titles, employee
+                                                            WHERE business_unit.id = position_titles.business_unit_id
+                                                            AND position_titles.id = employee.position_id
+                                                            ORDER BY salary ASC;` );
+        return rows;
+    },
+
+    listManager_employee: async () => {
+        const connection = await mysql;
+        const sql = "SELECT id, first_name, last_name FROM employee WHERE manager_id IS NULL ORDER BY last_name ASC;";
+        const [ rows, fields ]  = await connection.execute( sql );
         return rows;
     },
 
