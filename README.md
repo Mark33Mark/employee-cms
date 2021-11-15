@@ -71,7 +71,9 @@ Once the node.js dependencies are installed, you need to upload the database and
    source db/seeds.sql
    quit
 ```
-Once all dependencies are installed and you have created the employee_db database and seeded it with the data, you can run the application by typing:
+Once all dependencies are installed and you have created the employee_db database and seeded it with the data, you will need to amend the .env.EXAMPLE file by renaming it .env and updating the contents of the file with your mySQL username, database name and mySQL password.  
+
+Once all of these actions are completed you can run the application by typing:
 
 ```
 node index.js
