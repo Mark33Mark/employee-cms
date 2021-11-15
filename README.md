@@ -23,20 +23,21 @@
 **Why this project?**  
 * Developers are often asked to create interfaces that allow users to easily view and interact with information stored in databases. The interfaces are termed content management systems (CMS). This assignment is demonstrating some ideas for a content management system.
 
-![hosted landing page](./public/assets/img/screenshot1.jpg) ![note space](./public/assets/img/screenshot2.jpg) ![saved confirmation](./public/assets/img/screenshot3.jpg) ![timestamp and editable saved messages](./public/assets/img/screenshot4.jpg)
+![mySQL reverse engineered picture](./img/mySQL_workbench_reverse_engineer.jpg) ![main menu](./img/Screenshot1.jpg)![business unit salaries report](./img/Screenshot2.jpg) ![add employee](./img/WorkingScreenshot.jpg)
 
 
 **What problem does this project solve?**  
 * Provides a user friendly interface for people to quickly access and manage data to improve the management process.
 
 **Lessons learnt?**  
-* You absolutely needed to do pseudo code or a flow diagram before doing any of the coding.
+* First preparing pseudo code or a flow diagram before doing any of the coding was essential for this assignment due to the different pathways needing coding.
 * Whilst I did the coding I found this project a huge task to achieve a minimum viable product (MVP) in less than 1 week.  Main reason was the need to familiarise myself more deeply than what was covered in class with mySQL queries.  My code, unfortunately, shows the progression of my knowledge in handling the mySQL queries.  There is a lot of room to go back and tidy all of the code up.
 * I lost a lot of time with inquirer, getting the async to work well for populating the list choices.  
 * I created a seeds.sql file with over 200 employees.  I grabbed the data from mySQL's sample employee database.  I ended up having to rework a lot of the data and it cost me a lot of time as this assignment is a significantly simpler database than the mySQL example.  For example, I ended up simplifying the salaries to be more 'grouped' as mySQL's data had all unique salaries.
 * Whilst I've set the app up with over 200 employees, I realise the limitations of the command line environment would suggest that this application and similar Node.js apps would be better suited for companies with less than 50 employees.
 * I also, last minute, decided to change the table names and column names to align with Australian terminology, for example instead of Role, I changed to Position and Department to Business Unit.  Unfortunately I made the call to change this after I'd already set up the code base - something I should of decided on from the beginning.
 * I did my best code with modules but as I was trying to work fast I decided to focus more on getting a function application and then if time permits going back to tidy up the code, time has not permitted.
+* When an application becomes large with different menu options it becomes problematic testing the application for errors as just getting to each menu can be time consuming.  I can see the benefits of setting Jest unit testing up to help with this.  Unfortunately I ran out of time to prepare any unit tests.
 
 ---
 ### 2. Features  
@@ -50,6 +51,8 @@ Client requested features as implemented:
    - Choosing to add a role prompts the user to enter the name, salary, and department for the role and that role is added to the database.
    - Choosing to add an employee prompts the user to enter the employee’s first name, last name, role, and manager, and that employee is added to the database
    - Choosing to update an employee role prompts the user to select an employee to update and their new role and this information is updated in the database.
+
+   A walkthrough video has been prepared to demonstrate the features of the application.  The video is approximately 120Mb so it might be slow to start playing from my Google Drive if you don't download it first.  [Link to the video](https://drive.google.com/file/d/1TnSf_zIK8_5QUskd96Fgak2P1SoN5xHX/view?usp=sharing)
 
 ---
 ### 3. Installation  
@@ -81,7 +84,7 @@ You can modify the code as you need.
 
 ---
 ### 5. Credits  
-I referenced a lot of online material.  There are no particular call outs as I found I referenced some of my own code from past assignments.
+I referenced a lot of online material.  There are no particular call outs. I referenced some of my own code from past assignments.
 
 ---
 ### 6. License  
@@ -113,7 +116,7 @@ I referenced a lot of online material.  There are no particular call outs as I f
  All actions not checked are still to be completed:
 
  [x]  GitHub repository containing your application code.  
- [x]  Walkthrough video demonstrating the functionality of the employee tracker must be submitted [located]()  
+ [x]  Walkthrough video demonstrating the functionality of the employee tracker must be submitted [Walkthrough link on Google Drive](https://drive.google.com/file/d/1TnSf_zIK8_5QUskd96Fgak2P1SoN5xHX/view?usp=sharing)  
  [x]  Walkthrough video shows all of the technical acceptance criteria being met.  
  [x]  Walkthrough video demonstrates to invoke the application from the command line.  
  [x]  Walkthrough video demonstrates a functional menu with the options outlined in the acceptance criteria.  
